@@ -10,14 +10,12 @@ class MorseKey:
         self.indicator = indicator  # optional: LED/buzzer follow the key
 
     def read_symbol(self, timeout=None):
-        #print("indicator is:", self.indicator)
         """Wait for one press. Returns '.', '-', or None if timeout hit."""
         if not self.button.wait_for_press(timeout):
             return None
         start = time.time()
         if self.indicator:
             self.indicator.on()
-            #print("LED on called")
         self.button.wait_for_release()
         if self.indicator:
             self.indicator.off()
