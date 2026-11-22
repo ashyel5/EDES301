@@ -42,3 +42,18 @@ class Indicator:
     def cleanup(self):
         self.off()
         PWM.cleanup()
+
+    def play_morse(self, pattern, unit=config.MORSE_UNIT_SECONDS):
+        """Play a pattern like '.-' (dot = 1 unit, dash = 3, 1-unit gap between symbols)."""
+        try:
+            for i, symbol in enumerate(pattern):
+                if symbol == ".":
+                    self.beep(unit)
+                elif symbol == "-":
+                    self.beep(3 * unit)
+                else:
+                    continue
+                if i < len(pattern) - 1:
+                    time.sleep(unit)
+        finally:
+            self.off()

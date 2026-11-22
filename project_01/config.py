@@ -1,7 +1,7 @@
 """Central settings. Change things here, not in the classes."""
 
 # --- Quiet mode: set to False when testing in the library ---
-BUZZER_ENABLED = False
+BUZZER_ENABLED = True
 
 # --- Pins (Adafruit_BBIO names). TODO: replace with the pins you actually wired ---
 RED_BUTTON_PIN = "P2_2"      # 
@@ -28,3 +28,4 @@ BUZZER_DUTY = 50
 DASH_MIN_S = 0.25            # press shorter than this = dot, longer = dash
 LETTER_GAP_S = 0.75          # silence this long ends a letter
 WORD_GAP_S = 1.75            # silence this long ends a word
+MORSE_UNIT_SECONDS = 0.2
