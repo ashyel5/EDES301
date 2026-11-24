@@ -17,9 +17,9 @@ class MorseKey:
         if self.indicator:
             self.indicator.on()
         self.button.wait_for_release()
+        held = time.time() - start          # measure before anything slow
         if self.indicator:
             self.indicator.off()
-        held = time.time() - start
         return "-" if held >= config.DASH_MIN_S else "."
 
     def read_pattern(self, first_timeout=None):

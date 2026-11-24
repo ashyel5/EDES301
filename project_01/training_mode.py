@@ -121,42 +121,54 @@ class TrainingMode:
 # Start-screen controller (terminal menu for now)
 # ---------------------------------------------------------------------------
 class MorseTrainer:
-    def __init__(self, display, indicator, key):
+    def __init__(self, display, indicator, key, green_button, red_button):
         self.display = display
         self.indicator = indicator
         self.key = key
-        # (name, enabled)
-        self.options = [("Training mode", True), ("Typing mode", False)]
+        self.green = green_button
+        self.red = red_button
+        # (name, enabled, button color)
+        self.options = [("Training", True, "green"), ("Typing", False, "red")]
 
     def run(self):
-        selected = 0
         while True:
-            self.display.show_menu(self.options, selected)
-            choice = input("Pick a number (q to quit): ").strip().lower()
-
-            if choice == "q":
-                return
-            if not choice.isdigit() or not 1 <= int(choice) <= len(self.options):
-                print("  Invalid choice.")
-                continue
-
-            selected = int(choice) - 1
-            name, enabled = self.options[selected]
-            if not enabled:
-                print(f"  {name} isn't built yet.")
-                continue
-
-            if selected == 0:
+            self.display.show_menu(self.options, None)
+            if self._wait_for_choice() == "green":
                 TrainingMode(self.display, self.indicator, self.key).run()
+                time.sleep(2)           # let the last message stay up
+            else:
+                self.display.show_message("Typing mode coming soon")
+                time.sleep(1.5)
+
+    def _wait_for_choice(self):
+        """Block until green or red is pressed; returns 'green' or 'red'."""
+        while True:
+            if self.green.is_pressed():
+                self._wait_for_release(self.green)
+                return "green"
+            if self.red.is_pressed():
+                self._wait_for_release(self.red)
+                return "red"
+            time.sleep(0.02)
+
+    @staticmethod
+    def _wait_for_release(button):
+        while button.is_pressed():
+            time.sleep(0.02)
+        time.sleep(0.05)                # debounce
 
 
 if __name__ == "__main__":
     from display import Display
     indicator = Indicator()
     key = MorseKey(Button(config.BLUE_BUTTON_PIN), indicator)
+    green = Button(config.GREEN_BUTTON_PIN)
+    red = Button(config.RED_BUTTON_PIN)
     display = Display()
     try:
-        MorseTrainer(display, indicator, key).run()
+        MorseTrainer(display, indicator, key, green, red).run()
+    except KeyboardInterrupt:
+        pass
     finally:
         display.close()
         indicator.cleanup()

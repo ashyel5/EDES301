@@ -25,15 +25,18 @@ FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 # Everything is drawn with palette indices, then converted to RGB565 in one
 # fast step (see _to_rgb565). Add a color here to get a new index.
-BG, WHITE, DOT, DASH, GRAY, HILITE = range(6)
+BG, WHITE, DOT, DASH, GRAY, HILITE, GREEN, RED = range(8)
 COLORS = [
     (10, 10, 30),       # BG
     (255, 255, 255),    # WHITE  (the letter)
     (0, 200, 255),      # DOT
     (255, 170, 0),      # DASH
     (170, 170, 170),    # GRAY   (messages)
-    (50, 50, 110),      # HILITE (selected menu row)
+    (50, 50, 110),      # HILITE (unused for now)
+    (0, 200, 70),       # GREEN  (green button badge)
+    (230, 40, 40),      # RED    (red button badge)
 ]
+BADGES = {"green": GREEN, "red": RED}
 PALETTE = [c for rgb in COLORS for c in rgb]
 PALETTE += [0] * (768 - len(PALETTE))
 
@@ -84,10 +87,11 @@ class Display:
         self._message = text.strip()
         self._refresh(("letter", self._letter, self._morse, self._message))
 
-    def show_menu(self, options, selected):
-        """options is a list of (name, enabled)."""
+    def show_menu(self, options, selected=None):
+        """options is a list of (name, enabled, button_color). `selected`
+        is unused (kept so the call matches TerminalDisplay)."""
         self._letter, self._morse, self._message = None, "", ""
-        self._refresh(("menu", tuple(options), selected))
+        self._refresh(("menu", tuple(options)))
 
     def close(self):
         self.spi.close()
@@ -103,7 +107,7 @@ class Display:
         draw = ImageDraw.Draw(img)
 
         if state[0] == "menu":
-            self._draw_menu(draw, state[1], state[2])
+            self._draw_menu(draw, state[1])
         else:
             self._draw_letter_screen(draw, state[1], state[2], state[3])
 
@@ -122,14 +126,15 @@ class Display:
             for i, line in enumerate(lines):
                 self._text(draw, line, 16, WIDTH // 2, top + 20 * i + 10, GRAY)
 
-    def _draw_menu(self, draw, options, selected):
+    def _draw_menu(self, draw, options):
         self._text(draw, "MORSE TRAINER", 22, WIDTH // 2, 40, WHITE)
-        for i, (name, enabled) in enumerate(options):
-            y = 100 + i * 50
-            if i == selected:
-                draw.rectangle([10, y, WIDTH - 11, y + 38], fill=HILITE)
+        self._text(draw, "Press a button:", 16, WIDTH // 2, 85, GRAY)
+        for i, (name, enabled, color) in enumerate(options):
+            cy = 155 + i * 70
+            draw.ellipse([20, cy - 22, 63, cy + 21],
+                         fill=BADGES.get(color, WHITE))
             label = name if enabled else name + " (soon)"
-            self._text(draw, label, 17, 16, y + 19,
+            self._text(draw, label, 20, 78, cy,
                        WHITE if enabled else GRAY, align="left")
 
     def _draw_morse(self, draw, morse, cy):
