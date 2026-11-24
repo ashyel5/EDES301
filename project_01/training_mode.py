@@ -10,6 +10,7 @@ classes. Everything else is independent of your hardware classes.
 """
 
 import time
+import random
 import config
 from button import Button
 from indicator import Indicator
@@ -150,11 +151,12 @@ class MorseTrainer:
 
 
 if __name__ == "__main__":
-    indicator = Indicator()   # adjust constructor args to match your class
-    key = MorseKey(Button(config.BLUE_BUTTON_PIN), indicator)          # same here
-    MorseTrainer(TerminalDisplay(), indicator, key).run()
-    button = Button(config.BLUE_BUTTON_PIN)   # copy the real args from your test script
+    from display import Display
+    indicator = Indicator()
+    key = MorseKey(Button(config.BLUE_BUTTON_PIN), indicator)
+    display = Display()
     try:
-        MorseTrainer(TerminalDisplay(), indicator, key).run()
+        MorseTrainer(display, indicator, key).run()
     finally:
-        indicator.cleanup()    
+        display.close()
+        indicator.cleanup()

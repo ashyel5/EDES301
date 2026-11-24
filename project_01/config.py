@@ -1,7 +1,7 @@
 """Central settings. Change things here, not in the classes."""
 
 # --- Quiet mode: set to False when testing in the library ---
-BUZZER_ENABLED = True
+BUZZER_ENABLED = False
 
 # --- Pins (Adafruit_BBIO names). TODO: replace with the pins you actually wired ---
 RED_BUTTON_PIN = "P2_2"      # 
