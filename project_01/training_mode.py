@@ -15,6 +15,7 @@ import config
 from button import Button
 from indicator import Indicator
 from morse_key import MorseKey
+from typing_mode import TypingMode
 import morse_code
 
 
@@ -128,7 +129,7 @@ class MorseTrainer:
         self.green = green_button
         self.red = red_button
         # (name, enabled, button color)
-        self.options = [("Training", True, "green"), ("Typing", False, "red")]
+        self.options = [("Training", True, "green"), ("Typing", True, "red")]
 
     def run(self):
         while True:
@@ -137,7 +138,7 @@ class MorseTrainer:
                 TrainingMode(self.display, self.indicator, self.key).run()
                 time.sleep(2)           # let the last message stay up
             else:
-                self.display.show_message("Typing mode coming soon")
+                TypingMode(self.key, self.red, self.green, self.display).run()
                 time.sleep(1.5)
 
     def _wait_for_choice(self):

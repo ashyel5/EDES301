@@ -92,6 +92,11 @@ class Display:
         is unused (kept so the call matches TerminalDisplay)."""
         self._letter, self._morse, self._message = None, "", ""
         self._refresh(("menu", tuple(options)))
+        
+    def show_typing(self, text, symbols=""):
+        """Typed text (wrapped) with a cursor, plus a hint line."""
+        self._letter, self._morse, self._message = None, "", ""
+        self._refresh(("typing", text, symbols))
 
     def close(self):
         self.spi.close()
@@ -108,6 +113,8 @@ class Display:
 
         if state[0] == "menu":
             self._draw_menu(draw, state[1])
+        elif state[0] == "typing":
+            self._draw_typing(draw, state[1], state[2])
         else:
             self._draw_letter_screen(draw, state[1], state[2], state[3])
 
@@ -136,6 +143,27 @@ class Display:
             label = name if enabled else name + " (soon)"
             self._text(draw, label, 20, 78, cy,
                        WHITE if enabled else GRAY, align="left")
+   
+    def _draw_typing(self, draw, text, symbols):
+        self._text(draw, "TYPING", 16, WIDTH // 2, 18, GRAY)
+        font = self._font(28)
+        lines = self._wrap_chars(draw, text + "_", font, WIDTH - 20)
+        for i, line in enumerate(lines[-6:]):       # show the newest 6 lines
+            self._text(draw, line, 28, 10, 60 + 36 * i, WHITE, align="left")
+        self._draw_morse(draw, symbols, 275)
+        self._text(draw, "red: delete | green: done", 12, WIDTH // 2, 308, GRAY)
+
+    def _wrap_chars(self, draw, text, font, max_w):
+        """Wrap by character so long runs with no spaces still fit."""
+        lines, line = [], ""
+        for ch in text:
+            if line and self._measure(draw, line + ch, font)[0] > max_w:
+                lines.append(line)
+                line = "" if ch == " " else ch
+            else:
+                line += ch
+        lines.append(line)
+        return lines
 
     def _draw_morse(self, draw, morse, cy):
         """Dot = 1 unit, dash = 3 units, gap = 1 unit (real Morse timing)."""

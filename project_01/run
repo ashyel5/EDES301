@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /var/lib/cloud9/EDES301/project_01
+./configure_pins.sh
+PYTHONPATH=/var/lib/cloud9/EDES301/project_01 python3 main.py
